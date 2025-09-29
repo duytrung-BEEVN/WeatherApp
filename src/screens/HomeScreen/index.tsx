@@ -45,13 +45,19 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
   const route = useRoute<HomeModalRouteProp>();
   const [cities, setCities] = useState<ItemProps[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isCity, setIsCity] = useState(false);
 
   const screenWidth = Dimensions.get('window').width;
 
   //Call API Weather by nameCity
   const fetchWeather = async (name: string) => {
     try {
+      const cached = await AsyncStorage.getItem(`weather_${name}`);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        setWeather(parsed.weather);
+        setWeatherHour(parsed.weatherHour);
+        return;
+      }
       const res = await axios.get(
         `https://api.weatherapi.com/v1/forecast.json`,
         {
@@ -69,6 +75,11 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
 
       setWeatherHour(dataWeather);
       setWeather(res?.data);
+
+      await AsyncStorage.setItem(
+        `weather_${name}`,
+        JSON.stringify({ weather: res.data, weatherHour: dataWeather }),
+      );
     } catch (err) {
       console.error('Loi tai du lieu thoi tiet:', err);
     }
@@ -152,7 +163,25 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
             style={styles.imageBackground}
           >
             <View style={styles.viewTitle}>
-              <Text style={styles.textAddress}>{weather?.location?.name}</Text>
+              {weather?.location?.name === 'Hanoi' ? (
+                <View>
+                  <Text style={styles.textAddress}>Vị trí của tôi</Text>
+                  <Text
+                    style={{
+                      color: 'white',
+                      textAlign: 'center',
+                      fontWeight: 'bold',
+                      fontSize: 20,
+                    }}
+                  >
+                    Hanoi
+                  </Text>
+                </View>
+              ) : (
+                <Text style={styles.textAddress}>
+                  {weather?.location?.name}
+                </Text>
+              )}
               <Text style={styles.textTemperature}>
                 {renderNumber(weather?.current?.temp_c)}°
               </Text>
@@ -178,7 +207,7 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
               {/* Dự báo theo giờ */}
               <View style={styles.detail}>
                 <Text style={styles.detailText}>
-                  Dự báo có mây vào khoảng 14:00. Gió giật lên đến 5m/s.
+                  Dự báo có mây vài nơi vào khoảng 21:00.
                 </Text>
                 <View style={styles.line} />
                 <ScrollView
@@ -190,7 +219,9 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
                     if (checkDay(h?.time))
                       return (
                         <View style={styles.detailHour} key={index}>
-                          <Text style={styles.textNote}>{hour} giờ</Text>
+                          <Text style={styles.textNote}>
+                            {hour === moment().format('HH') ? 'Bây' : hour} giờ
+                          </Text>
                           <Image
                             source={{
                               uri: `https:${h?.condition?.icon}`,
@@ -235,7 +266,7 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
             <View style={styles.footer}>
               <Image
                 source={require('../../../img/map.png')}
-                style={styles.iconFooter}
+                style={styles.iconFooterSelected}
               />
               <View style={{ flexDirection: 'row' }}>
                 {cities.map((c, idx) => {
@@ -244,7 +275,11 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
                       <Image
                         key={idx}
                         source={require('../../../img/right-arrow.png')}
-                        style={styles.iconFooter}
+                        style={
+                          idx === currentIndex
+                            ? styles.iconFooterSelected
+                            : styles.iconFooter ?? styles.iconFooter
+                        }
                       />
                     );
                   } else {
@@ -252,12 +287,11 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
                       <Image
                         key={idx}
                         source={require('../../../img/dot.png')}
-                        style={[
-                          styles.iconFooter,
-                          isCity && c.name !== 'Hanoi'
-                            ? { width: 35, height: 35 }
-                            : { width: 20, height: 20 },
-                        ]}
+                        style={
+                          idx === currentIndex
+                            ? styles.iconFooterSelected
+                            : styles.iconFooter
+                        }
                       />
                     );
                   }
@@ -270,7 +304,7 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
               >
                 <Image
                   source={require('../../../img/list.png')}
-                  style={styles.iconFooter}
+                  style={styles.iconFooterSelected}
                 />
               </TouchableOpacity>
             </View>

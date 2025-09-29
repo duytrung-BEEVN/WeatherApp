@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable react-native/no-inline-styles */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -114,14 +115,12 @@ const ListScreen = () => {
 
         cities = [hanoiCity];
         await AsyncStorage.setItem('cities', JSON.stringify(cities));
-        console.log(cities);
       }
 
       setCity([]);
       for (const c of cities) {
         await fetchListCityWeather(c.name);
       }
-      console.log(cities);
     } catch (err) {
       console.error('Lỗi khi load cities từ storage:', err);
     }
@@ -204,12 +203,11 @@ const ListScreen = () => {
   const Item = (item: cityList) => {
     return (
       <View
-        style={[
-          styles.viewList,
+        style={
           isEditing && item.name !== 'Hanoi'
-            ? { width: '90%' }
-            : { width: '100%' },
-        ]}
+            ? styles.viewListEdit
+            : styles.viewList
+        }
       >
         {isEditing && item.name !== 'Hanoi' && (
           <TouchableOpacity
@@ -272,6 +270,7 @@ const ListScreen = () => {
         </TouchableOpacity>
       ) : (
         <Popover
+          popoverStyle={styles.popoverContainer}
           isVisible={showPopover}
           onRequestClose={() => setShowPopover(false)}
           arrowSize={{ width: 0, height: 0 }}
@@ -288,54 +287,58 @@ const ListScreen = () => {
           }
         >
           <View style={styles.viewPopover}>
-            <TouchableOpacity>
-              <Text
-                style={styles.menuItem}
-                onPress={() => {
-                  setShowPopover(false);
-                  editListCity();
-                }}
-              >
-                Sửa danh sách
-              </Text>
+            <TouchableOpacity
+              style={styles.popoverItem}
+              onPress={() => {
+                setShowPopover(false);
+                editListCity();
+              }}
+            >
+              <Text style={styles.menuItem}>Sửa danh sách</Text>
+              <Image
+                source={require('../../../img/pencil.png')}
+                style={styles.iconPopover}
+              />
             </TouchableOpacity>
-            <TouchableOpacity>
-              <Text
-                style={styles.menuItem}
-                onPress={() => setShowPopover(false)}
-              >
-                Thông báo
-              </Text>
+            <TouchableOpacity
+              style={styles.popoverItem}
+              onPress={() => setShowPopover(false)}
+            >
+              <Text style={styles.menuItem}>Thông báo</Text>
+              <Image
+                style={styles.iconPopover}
+                source={require('../../../img/notification.png')}
+              />
             </TouchableOpacity>
-            <TouchableOpacity>
-              <Text
-                style={styles.menuItem}
-                onPress={() => {
-                  setUnit('C');
-                  setShowPopover(false);
-                }}
-              >
-                Độ C
-              </Text>
+            <TouchableOpacity
+              style={styles.popoverItem}
+              onPress={() => {
+                setUnit('C');
+                setShowPopover(false);
+              }}
+            >
+              <Text style={styles.menuItem}>Độ C</Text>
+              <Text style={styles.menuItem}>°C</Text>
             </TouchableOpacity>
-            <TouchableOpacity>
-              <Text
-                style={styles.menuItem}
-                onPress={() => {
-                  setUnit('F');
-                  setShowPopover(false);
-                }}
-              >
-                Độ F
-              </Text>
+            <TouchableOpacity
+              style={styles.popoverItem}
+              onPress={() => {
+                setUnit('F');
+                setShowPopover(false);
+              }}
+            >
+              <Text style={styles.menuItem}>Độ F</Text>
+              <Text style={styles.menuItem}>F</Text>
             </TouchableOpacity>
-            <TouchableOpacity>
-              <Text
-                style={styles.menuItem}
-                onPress={() => setShowPopover(false)}
-              >
-                Báo cáo sự cố
-              </Text>
+            <TouchableOpacity
+              style={styles.popoverItem}
+              onPress={() => setShowPopover(false)}
+            >
+              <Text style={styles.menuItem}>Báo cáo sự cố</Text>
+              <Image
+                style={styles.iconPopover}
+                source={require('../../../img/warning.png')}
+              />
             </TouchableOpacity>
           </View>
         </Popover>

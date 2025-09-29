@@ -7,6 +7,12 @@ const styles = StyleSheet.create({
     paddingTop: 70,
     backgroundColor: 'black',
   },
+  popoverContainer: {
+    backgroundColor: 'grey',
+    width: 200,
+    marginLeft: 110,
+    borderRadius: 16,
+  },
   buttonDone: {
     marginLeft: 350,
     width: 50,
@@ -69,6 +75,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  viewListEdit: {
+    paddingRight: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   buttonDelete: {
     backgroundColor: 'red',
     color: 'white',
@@ -116,6 +127,10 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   textNote: {
+    height: 32,
+    width: 250,
+    marginRight: 20,
+    flexWrap: 'wrap',
     color: 'white',
     fontSize: 12,
   },
@@ -128,14 +143,24 @@ const styles = StyleSheet.create({
     backgroundColor: 'grey',
     borderRadius: 16,
     padding: 8,
-    width: 300,
     height: 'auto',
+  },
+  popoverItem: {
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    alignContent: 'center',
+    paddingVertical: 4,
   },
   menuItem: {
     fontSize: 16,
     color: 'white',
-    paddingVertical: 8,
-    paddingLeft: 16,
+    paddingLeft: 4,
+  },
+  iconPopover: {
+    height: 20,
+    width: 20,
+    resizeMode: 'contain',
+    marginLeft: 8,
   },
   listView: {},
 });
