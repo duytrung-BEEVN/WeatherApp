@@ -45,45 +45,59 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
   const route = useRoute<HomeModalRouteProp>();
   const [cities, setCities] = useState<ItemProps[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [refresh, setRefresh] = useState(false);
 
   const screenWidth = Dimensions.get('window').width;
 
-  //Call API Weather by nameCity
-  const fetchWeather = async (name: string) => {
-    try {
-      const cached = await AsyncStorage.getItem(`weather_${name}`);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        setWeather(parsed.weather);
-        setWeatherHour(parsed.weatherHour);
-        return;
-      }
-      const res = await axios.get(
-        `https://api.weatherapi.com/v1/forecast.json`,
-        {
-          params: {
-            q: name,
-            days: '10',
-            lang: 'vi',
-            key: 'ec1878bf2e944f7fb5584057252309',
+  //Get Weather by nameCity
+  const fetchWeather = useCallback(
+    async (name: string) => {
+      try {
+        if (refresh) {
+          const cached = await AsyncStorage.getItem(`weather_${name}`);
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            setWeather(parsed.weather);
+            setWeatherHour(parsed.weatherHour);
+            console.log('cached');
+            return;
+          }
+        }
+
+        // Call API
+        const res = await axios.get(
+          `https://api.weatherapi.com/v1/forecast.json`,
+          {
+            params: {
+              q: name,
+              days: '10',
+              lang: 'vi',
+              key: 'ec1878bf2e944f7fb5584057252309',
+            },
           },
-        },
-      );
-      const weather1 = res?.data?.forecast?.forecastday?.[0]?.hour ?? [];
-      const weather2 = res?.data?.forecast?.forecastday?.[1]?.hour ?? [];
-      const dataWeather = [...weather1, ...weather2];
+        );
+        const weather1 = res?.data?.forecast?.forecastday?.[0]?.hour ?? [];
+        const weather2 = res?.data?.forecast?.forecastday?.[1]?.hour ?? [];
+        const dataWeather = [...weather1, ...weather2];
 
-      setWeatherHour(dataWeather);
-      setWeather(res?.data);
+        setWeatherHour(dataWeather);
+        setWeather(res?.data);
+        console.log('api');
 
-      await AsyncStorage.setItem(
-        `weather_${name}`,
-        JSON.stringify({ weather: res.data, weatherHour: dataWeather }),
-      );
-    } catch (err) {
-      console.error('Loi tai du lieu thoi tiet:', err);
-    }
-  };
+        // Lưu cache
+        await AsyncStorage.setItem(
+          `weather_${name}`,
+          JSON.stringify({
+            weather: res.data,
+            weatherHour: dataWeather,
+          }),
+        );
+      } catch (err) {
+        console.error('Lỗi tải dữ liệu thời tiết:', err);
+      }
+    },
+    [refresh],
+  );
 
   const loadNameCity = useCallback(() => {
     try {
@@ -98,7 +112,7 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
     } catch (err) {
       console.error('Loi khi tai du lieu:', err);
     }
-  }, [route?.params?.item?.name, cities]);
+  }, [route.params?.item?.name, cities, fetchWeather]);
 
   useEffect(() => {
     loadNameCity();
@@ -128,7 +142,7 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
         return true;
       } else return false;
     } else {
-      if (moment(day).format('HH') <= currenHour) {
+      if (moment(day).format('HH') < currenHour) {
         return true;
       }
     }
@@ -152,6 +166,7 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
       onMomentumScrollEnd={e => {
         const index = Math.round(e.nativeEvent.contentOffset.x / screenWidth);
         setCurrentIndex(index);
+        setRefresh(true);
         fetchWeather(cities[index].name);
       }}
     >
@@ -170,8 +185,8 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
                     style={{
                       color: 'white',
                       textAlign: 'center',
-                      fontWeight: 'bold',
-                      fontSize: 20,
+                      fontWeight: '500',
+                      fontSize: 16,
                     }}
                   >
                     Hanoi
@@ -215,12 +230,17 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
                   showsHorizontalScrollIndicator={false}
                 >
                   {weatherHour?.map((h, index) => {
-                    const hour = moment(h?.time).format('HH');
                     if (checkDay(h?.time))
                       return (
                         <View style={styles.detailHour} key={index}>
                           <Text style={styles.textNote}>
-                            {hour === moment().format('HH') ? 'Bây' : hour} giờ
+                            {moment(h?.time).isSame(
+                              moment(weather?.location?.localtime),
+                              'hour',
+                            )
+                              ? 'Bây '
+                              : moment(h?.time).format('HH')}
+                            giờ
                           </Text>
                           <Image
                             source={{
