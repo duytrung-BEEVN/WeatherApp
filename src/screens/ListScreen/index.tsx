@@ -386,9 +386,10 @@ const ListScreen = () => {
         style={styles.listAddress}
         data={city}
         renderItem={({ item }) => Item(item)}
-        keyExtractor={item => item.id.toString()}
         // eslint-disable-next-line react/no-unstable-nested-components
-        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+        ItemSeparatorComponent={() => (
+          <View style={{ height: 12, backgroundColor: 'red' }} />
+        )}
         showsVerticalScrollIndicator={false}
       />
     </View>

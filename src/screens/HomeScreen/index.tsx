@@ -7,6 +7,7 @@ import {
   View,
   Image,
   TouchableOpacity,
+  Dimensions,
 } from 'react-native';
 import styles from './styles';
 import axios from 'axios';
@@ -15,7 +16,6 @@ import { WeatherResponse, Hour } from '../../../responseAPIType';
 import moment from 'moment';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Dimensions } from 'react-native';
 
 type RootStackParamList = {
   HomeScreen: { item?: ItemProps };
@@ -45,7 +45,7 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
   const route = useRoute<HomeModalRouteProp>();
   const [cities, setCities] = useState<ItemProps[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [refresh, setRefresh] = useState(false);
+  const [refresh, setRefresh] = useState(true);
 
   const screenWidth = Dimensions.get('window').width;
 
@@ -59,7 +59,6 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
             const parsed = JSON.parse(cached);
             setWeather(parsed.weather);
             setWeatherHour(parsed.weatherHour);
-            console.log('cached');
             return;
           }
         }
@@ -82,8 +81,6 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
 
         setWeatherHour(dataWeather);
         setWeather(res?.data);
-        console.log('api');
-
         // Lưu cache
         await AsyncStorage.setItem(
           `weather_${name}`,
@@ -166,7 +163,7 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
       onMomentumScrollEnd={e => {
         const index = Math.round(e.nativeEvent.contentOffset.x / screenWidth);
         setCurrentIndex(index);
-        setRefresh(true);
+        setRefresh(false);
         fetchWeather(cities[index].name);
       }}
     >
