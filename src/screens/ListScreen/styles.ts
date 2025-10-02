@@ -142,27 +142,30 @@ const styles = StyleSheet.create({
   viewPopover: {
     backgroundColor: 'grey',
     borderRadius: 16,
-    padding: 8,
+    padding: 4,
     height: 'auto',
   },
   popoverItem: {
     justifyContent: 'space-between',
     flexDirection: 'row',
-    alignContent: 'center',
-    paddingVertical: 4,
+    padding: 4,
   },
   menuItem: {
     fontSize: 16,
     color: 'white',
-    paddingLeft: 4,
+    paddingLeft: 12,
   },
   iconPopover: {
     height: 20,
     width: 20,
     resizeMode: 'contain',
-    marginLeft: 8,
+    marginLeft: 20,
   },
-  listView: {},
+  iconTicked: {
+    backgroundColor: 'red',
+    height: 10,
+    width: 10,
+  },
 });
 
 export default styles;

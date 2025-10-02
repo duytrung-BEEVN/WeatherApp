@@ -317,8 +317,18 @@ const ListScreen = () => {
                 setShowPopover(false);
               }}
             >
-              <Text style={styles.menuItem}>Độ C</Text>
-              <Text style={styles.menuItem}>°C</Text>
+              {unit === 'C' ? (
+                <Image
+                  style={styles.iconTicked}
+                  source={require('../../../img/tick.png')}
+                />
+              ) : (
+                <></>
+              )}
+              <View style={{ justifyContent: 'space-between', width: 200 }}>
+                <Text style={styles.menuItem}>Độ C</Text>
+                <Text style={styles.menuItem}>°C</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.popoverItem}
@@ -327,9 +337,18 @@ const ListScreen = () => {
                 setShowPopover(false);
               }}
             >
+              {unit === 'F' ? (
+                <Image
+                  style={styles.iconTicked}
+                  source={require('../../../img/tick.png')}
+                />
+              ) : (
+                <></>
+              )}
               <Text style={styles.menuItem}>Độ F</Text>
-              <Text style={styles.menuItem}>F</Text>
+              <Text style={styles.menuItem}>°F</Text>
             </TouchableOpacity>
+
             <TouchableOpacity
               style={styles.popoverItem}
               onPress={() => setShowPopover(false)}
@@ -361,10 +380,7 @@ const ListScreen = () => {
           placeholderTextColor="#dfdbdbff"
         />
         {/* Icon Cancel */}
-        <TouchableOpacity
-          style={{ backgroundColor: 'red' }}
-          onPress={clearText}
-        >
+        <TouchableOpacity onPress={clearText}>
           <Text style={styles.textCancel}>X</Text>
         </TouchableOpacity>
       </View>
@@ -387,9 +403,7 @@ const ListScreen = () => {
         data={city}
         renderItem={({ item }) => Item(item)}
         // eslint-disable-next-line react/no-unstable-nested-components
-        ItemSeparatorComponent={() => (
-          <View style={{ height: 12, backgroundColor: 'red' }} />
-        )}
+        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
         showsVerticalScrollIndicator={false}
       />
     </View>

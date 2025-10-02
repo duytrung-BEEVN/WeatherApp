@@ -11,7 +11,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'transparent',
   },
-
   imageBackground: {
     flex: 1,
     justifyContent: 'center',

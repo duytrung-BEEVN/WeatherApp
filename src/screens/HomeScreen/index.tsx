@@ -53,7 +53,7 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
   const fetchWeather = useCallback(
     async (name: string) => {
       try {
-        if (refresh) {
+        if (!refresh) {
           const cached = await AsyncStorage.getItem(`weather_${name}`);
           if (cached) {
             const parsed = JSON.parse(cached);
@@ -75,6 +75,7 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
             },
           },
         );
+
         const weather1 = res?.data?.forecast?.forecastday?.[0]?.hour ?? [];
         const weather2 = res?.data?.forecast?.forecastday?.[1]?.hour ?? [];
         const dataWeather = [...weather1, ...weather2];
@@ -100,7 +101,8 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
     try {
       const nameCity = route?.params?.item?.name;
       const idx = cities.findIndex(c => c.name === route.params?.item?.name);
-      if (!nameCity || nameCity === '') {
+
+      if (!nameCity) {
         setCurrentIndex(0);
         return fetchWeather('Hanoi');
       }
@@ -122,7 +124,19 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
         const storedCities = await AsyncStorage.getItem('cities');
         if (storedCities) {
           setCities(JSON.parse(storedCities));
-        }
+        } else
+          setCities([
+            {
+              id: 2718413,
+              name: 'Hanoi',
+              country: 'Vietnam',
+              temp_c: 36,
+              min_temp: 30,
+              max_temp: 60,
+              note: 'string',
+              time: '2025-10-01 16:00',
+            },
+          ]);
       } catch (err) {
         console.error('Lỗi khi load city:', err);
       }
