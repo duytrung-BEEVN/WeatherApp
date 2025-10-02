@@ -309,7 +309,7 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
                         style={
                           idx === currentIndex
                             ? styles.iconFooterSelected
-                            : styles.iconFooter ?? styles.iconFooter
+                            : styles.iconFooter
                         }
                       />
                     );

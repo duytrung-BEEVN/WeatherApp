@@ -125,6 +125,7 @@ const styles = StyleSheet.create({
   time: {
     fontSize: 12,
     color: 'white',
+    fontWeight: 500,
   },
   textNote: {
     height: 32,
@@ -133,6 +134,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     color: 'white',
     fontSize: 12,
+    fontWeight: 500,
   },
   temperature: {
     fontSize: 52,

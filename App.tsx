@@ -17,7 +17,11 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator
+        screenOptions={{
+          gestureEnabled: false,
+        }}
+      >
         <Stack.Screen
           name="HomeScreen"
           component={HomeScreen}
