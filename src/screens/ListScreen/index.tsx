@@ -1,12 +1,9 @@
-/* eslint-disable @typescript-eslint/no-shadow */
-/* eslint-disable react-native/no-inline-styles */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
   Image,
   TouchableOpacity,
-  ImageBackground,
   TextInput,
   FlatList,
 } from 'react-native';
@@ -16,26 +13,11 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import axios from 'axios';
 import { debounce } from 'lodash';
-import moment from 'moment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ButtonActionPopover from '../../components/ButtonActionPopover';
+import { cityList, citySearchList } from '../../types/Type';
+import CityItem from '../../components/CityItem';
 
-type citySearchList = {
-  id: number;
-  name: string;
-  region: string;
-  country: string;
-};
-type cityList = {
-  id: number;
-  name: string;
-  country: string;
-  time: Date;
-  temp_c: number;
-  temp_f: number;
-  maxtemp_c: number;
-  mintemp_c: number;
-  note: string;
-};
 type RootStackParamList = {
   HomeScreen: { item: cityList };
   ListScreen: { city: cityList };
@@ -81,7 +63,7 @@ const ListScreen = () => {
     debounce(nextValue => fetchSearchCity(nextValue), 300),
   ).current;
 
-  // Lay cities tu AsyncStorage
+  // Get cities from AsyncStorage
   const loadCitiesFromStorage = useCallback(async () => {
     try {
       const storedCities = await AsyncStorage.getItem('cities');
@@ -158,13 +140,13 @@ const ListScreen = () => {
     }
   };
 
-  // Sua danh sach
+  // Edit List
   const editListCity = () => {
     setIsEditing(prev => !prev);
   };
 
-  // Chuyen doi nhiet do C-F
-  const convertTemperature = (tempC: number) => {
+  // Change temperature C-F
+  const changeTemp = (tempC: number) => {
     if (unit === 'C') {
       return `${Math.round(tempC)}°`;
     } else {
@@ -172,15 +154,13 @@ const ListScreen = () => {
     }
   };
 
-  // Anh nen
-  const imageBackground = require('../../../img/hinh-nen-bau-troi-xanh_(6).jpg');
-
+  // Clear Text on TextInput
   const clearText = () => {
     setKeyword('');
     setSearchCity([]);
   };
 
-  // Xoa thanh pho
+  // Delete City
   const deleteCity = async (id: number) => {
     try {
       const updated = city.filter(item => item.id !== id);
@@ -199,65 +179,50 @@ const ListScreen = () => {
     return unsubscribe;
   }, [loadCitiesFromStorage, navigation]);
 
-  // eslint-disable-next-line react/no-unstable-nested-components
-  const Item = (item: cityList) => {
-    return (
-      <View
-        style={
-          isEditing && item.name !== 'Hanoi'
-            ? styles.viewListEdit
-            : styles.viewList
-        }
-      >
-        {isEditing && item.name !== 'Hanoi' && (
-          <TouchableOpacity
-            style={styles.buttonDelete}
-            onPress={() => deleteCity(item.id)}
-          >
-            <Text style={styles.textCancel}>X</Text>
-          </TouchableOpacity>
-        )}
-        <TouchableOpacity
-          disabled={isEditing}
-          onPress={() => navigation.navigate('HomeScreen', { item })}
-          style={styles.viewImageBackground}
-        >
-          <ImageBackground
-            source={imageBackground}
-            resizeMode="cover"
-            style={styles.imageBackground}
-          >
-            <View style={styles.detail}>
-              <View>
-                <Text style={styles.address}>{item?.name}</Text>
-                <Text style={styles.time}>
-                  {moment(item?.time).format('HH:mm')}
-                </Text>
-              </View>
-              <Text style={styles.textNote}>{item?.note}</Text>
-            </View>
-            <View style={styles.detail}>
-              <Text style={styles.temperature}>
-                {convertTemperature(item.temp_c)}
-              </Text>
-              <Text style={styles.textNote}>
-                C:{convertTemperature(item.maxtemp_c)}
-                T:{convertTemperature(item.mintemp_c)}
-              </Text>
-            </View>
-          </ImageBackground>
-        </TouchableOpacity>
-        {isEditing && item.name !== 'Hanoi' && (
-          <TouchableOpacity style={styles.iconMenu}>
-            <Image
-              source={require('../../../img/menu.png')}
-              style={styles.iconMenu}
-            />
-          </TouchableOpacity>
-        )}
-      </View>
-    );
+  // Action Popover
+  const onEditList = () => {
+    setShowPopover(false);
+    editListCity();
   };
+
+  const onSetCelsius = () => {
+    setUnit('C');
+    setShowPopover(false);
+  };
+  const onSetF = () => {
+    setUnit('F');
+    setShowPopover(false);
+  };
+
+  const popoverActionItems = [
+    {
+      title: 'Sửa danh sách',
+      onPressItem: onEditList,
+      icon: require('../../../img/pencil.png'),
+    },
+    {
+      title: 'Thông báo',
+      icon: require('../../../img/notification.png'),
+      onPressItem: () => setShowPopover(false),
+    },
+    {
+      title: 'Độ C',
+      onPressItem: onSetCelsius,
+      textRight: '°C',
+      isTick: unit === 'C',
+    },
+    {
+      title: 'Độ F',
+      onPressItem: onSetF,
+      textRight: '°F',
+      isTick: unit === 'F',
+    },
+    {
+      title: 'Báo cáo sự cố',
+      onPressItem: () => setShowPopover(false),
+      icon: require('../../../img/warning.png'),
+    },
+  ];
 
   return (
     <View style={styles.container}>
@@ -287,82 +252,20 @@ const ListScreen = () => {
           }
         >
           <View style={styles.viewPopover}>
-            <TouchableOpacity
-              style={styles.popoverItem}
-              onPress={() => {
-                setShowPopover(false);
-                editListCity();
-              }}
-            >
-              <Text style={styles.menuItem}>Sửa danh sách</Text>
-              <Image
-                source={require('../../../img/pencil.png')}
-                style={styles.iconPopover}
+            {popoverActionItems?.map(item => (
+              <ButtonActionPopover
+                title={item.title}
+                icon={item.icon}
+                onPressItem={item.onPressItem}
+                textRight={item.textRight}
+                isTick={item.isTick}
               />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.popoverItem}
-              onPress={() => setShowPopover(false)}
-            >
-              <Text style={styles.menuItem}>Thông báo</Text>
-              <Image
-                style={styles.iconPopover}
-                source={require('../../../img/notification.png')}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.popoverItem}
-              onPress={() => {
-                setUnit('C');
-                setShowPopover(false);
-              }}
-            >
-              {unit === 'C' ? (
-                <Image
-                  style={styles.iconTicked}
-                  source={require('../../../img/tick.png')}
-                />
-              ) : (
-                <></>
-              )}
-              <View style={{ justifyContent: 'space-between', width: 200 }}>
-                <Text style={styles.menuItem}>Độ C</Text>
-                <Text style={styles.menuItem}>°C</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.popoverItem}
-              onPress={() => {
-                setUnit('F');
-                setShowPopover(false);
-              }}
-            >
-              {unit === 'F' ? (
-                <Image
-                  style={styles.iconTicked}
-                  source={require('../../../img/tick.png')}
-                />
-              ) : (
-                <></>
-              )}
-              <Text style={styles.menuItem}>Độ F</Text>
-              <Text style={styles.menuItem}>°F</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.popoverItem}
-              onPress={() => setShowPopover(false)}
-            >
-              <Text style={styles.menuItem}>Báo cáo sự cố</Text>
-              <Image
-                style={styles.iconPopover}
-                source={require('../../../img/warning.png')}
-              />
-            </TouchableOpacity>
+            ))}
           </View>
         </Popover>
       )}
       <Text style={styles.title}>Thời tiết</Text>
+      {/* Box Search */}
       <View style={styles.searchContainer}>
         {/* Icon Search */}
         <TouchableOpacity>
@@ -401,10 +304,23 @@ const ListScreen = () => {
       <FlatList
         style={styles.listAddress}
         data={city}
-        renderItem={({ item }) => Item(item)}
+        keyExtractor={item => item.id.toString()}
         // eslint-disable-next-line react/no-unstable-nested-components
-        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+        ItemSeparatorComponent={() => (
+          <View style={styles.distanceItemFlatList} />
+        )}
         showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => (
+          <CityItem
+            item={item}
+            isEditing={isEditing}
+            onDelete={deleteCity}
+            onPress={cityItem =>
+              navigation.navigate('HomeScreen', { item: cityItem })
+            }
+            changeTemp={changeTemp}
+          />
+        )}
       />
     </View>
   );

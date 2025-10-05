@@ -13,20 +13,14 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
-import { WeatherResponse, Hour } from '../../../responseAPIType';
+import { WeatherResponse, Hour } from '../../types/responseAPIType';
+import { cityList } from '../../types/Type';
 
 type RootStackParamList = {
   ListScreen: { city: cityList };
   HomeModal: { city: cityList };
 };
 
-// Cac du lieu lay tu API
-type cityList = {
-  id: number;
-  name: string;
-  region: string;
-  country: string;
-};
 type MainScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'HomeModal'
@@ -79,14 +73,14 @@ const HomeModal = ({
 
   // Kiem tra de hien thi thoi tiet theo gio
   const checkDay = (day: string | number) => {
-    const currenHour = moment().format('HH');
-    const currentDay = moment().format('L');
+    const currenHour = moment(weather?.location?.localtime).format('HH'); //gio cua thanh pho hien tai
+    const currentDay = moment(weather?.location?.localtime).format('L'); //ngay cua thanh pho hien tai
     if (moment(day).format('L') === currentDay) {
       if (moment(day).format('HH') >= currenHour) {
         return true;
       } else return false;
     } else {
-      if (moment(day).format('HH') <= currenHour) {
+      if (moment(day).format('HH') < currenHour) {
         return true;
       }
     }
@@ -102,6 +96,7 @@ const HomeModal = ({
   const addCityWeather = async () => {
     try {
       const storedCities = await AsyncStorage.getItem('cities');
+      // eslint-disable-next-line @typescript-eslint/no-shadow
       const cityList: cityList[] = storedCities ? JSON.parse(storedCities) : [];
       const exists = cityList.some(c => c.name === city.name);
       if (!exists) {
@@ -114,6 +109,15 @@ const HomeModal = ({
       console.error('Lỗi khi thêm city:', error);
     }
   };
+
+  // Vi tri cua nhiet do va do dai thanh nhiet do hien tai
+  const minTemp = weather?.forecast?.forecastday
+    ? Math.min(...weather?.forecast?.forecastday?.map(d => d.day.mintemp_c))
+    : 0;
+  const maxTemp = weather?.forecast?.forecastday
+    ? Math.max(...weather?.forecast?.forecastday?.map(d => d.day.maxtemp_c))
+    : 0;
+
   // Anh nen cua tung thanh pho
   const imageBackground = require('../../../img/hinh-nen-bau-troi-xanh_(6).jpg');
 
@@ -145,7 +149,11 @@ const HomeModal = ({
         </Text>
       </View>
       {/* Details */}
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        stickyHeaderIndices={[0]}
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Dự báo theo giờ */}
         <View style={styles.detail}>
           <Text style={styles.detailText}>
@@ -154,11 +162,18 @@ const HomeModal = ({
           <View style={styles.line} />
           <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
             {weatherHour?.map((h, index) => {
-              const hour = moment(h?.time).format('HH');
               if (checkDay(h?.time))
                 return (
                   <View style={styles.detailHour} key={index}>
-                    <Text style={styles.textNote}>{hour} giờ</Text>
+                    <Text style={styles.textNote}>
+                      {moment(h?.time).isSame(
+                        moment(weather?.location?.localtime),
+                        'hour',
+                      )
+                        ? 'Bây '
+                        : moment(h?.time).format('HH')}
+                      giờ
+                    </Text>
                     <Image
                       source={{
                         uri: `https:${h?.condition?.icon}`,
@@ -178,8 +193,11 @@ const HomeModal = ({
         <View style={styles.detailDay}>
           <Text style={styles.detailText}>DỰ BÁO TRONG 10 NGÀY</Text>
           <Text style={styles.line} />
-          {weather?.forecast?.forecastday?.slice(0, 10).map((d, idx) => {
+          {weather?.forecast?.forecastday?.map((d, idx) => {
             const day = moment(d?.date).format('dddd');
+            const isDay =
+              moment(d?.date).format('L') ===
+              moment(weather?.location?.localtime).format('L');
             return (
               <View style={styles.detailEveryDay} key={idx}>
                 <Text style={styles.textDay}>{day}</Text>
@@ -189,11 +207,57 @@ const HomeModal = ({
                   resizeMode="cover"
                 />
                 <Text style={styles.minTemperature}>
-                  {renderNumber(d?.day?.mintemp_c)}°
+                  {renderNumber(
+                    isDay
+                      ? weather?.current?.temp_c < d?.day?.mintemp_c
+                        ? weather?.current?.temp_c
+                        : d?.day?.mintemp_c
+                      : d?.day?.mintemp_c,
+                  )}
+                  °
                 </Text>
-                <Text style={styles.line} />
+                <View style={styles.tempBarMax}>
+                  <View
+                    style={[
+                      styles.tempBar,
+                      {
+                        marginLeft:
+                          ((d?.day?.mintemp_c - minTemp) /
+                            (maxTemp - minTemp)) *
+                          100,
+                        width:
+                          ((d?.day?.maxtemp_c - d?.day?.mintemp_c) /
+                            (maxTemp - minTemp)) *
+                          100,
+                      },
+                    ]}
+                  >
+                    {moment(d?.date).format('L') ===
+                    moment(weather?.location?.localtime).format('L') ? (
+                      <Image
+                        source={require('../../../img/dot.png')}
+                        style={[
+                          styles.curTempIcon,
+                          {
+                            marginLeft:
+                              ((weather?.current?.temp_c - minTemp) /
+                                (maxTemp - minTemp)) *
+                              100,
+                          },
+                        ]}
+                      />
+                    ) : null}
+                  </View>
+                </View>
                 <Text style={styles.maxTemperature}>
-                  {renderNumber(d?.day?.maxtemp_c)}°
+                  {renderNumber(
+                    isDay
+                      ? weather?.current?.temp_c > d?.day?.maxtemp_c
+                        ? weather?.current?.temp_c
+                        : d?.day?.maxtemp_c
+                      : d?.day?.maxtemp_c,
+                  )}
+                  °
                 </Text>
               </View>
             );

@@ -1,35 +1,21 @@
-/* eslint-disable react-native/no-inline-styles */
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  Text,
-  ScrollView,
-  ImageBackground,
-  View,
-  Image,
-  TouchableOpacity,
-  Dimensions,
-} from 'react-native';
+import { ScrollView, ImageBackground, View, Dimensions } from 'react-native';
 import styles from './styles';
 import axios from 'axios';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { WeatherResponse, Hour } from '../../../responseAPIType';
+import { WeatherResponse, Hour } from '../../types/responseAPIType';
 import moment from 'moment';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { cityList } from '../../types/Type';
+import WeatherTitle from '../../components/WeatherTitle';
+import HourlyForecast from '../../components/HourlyForecast';
+import DailyForecast from '../../components/DailyForecast';
+import Footer from '../../components/Footer';
 
 type RootStackParamList = {
-  HomeScreen: { item?: ItemProps };
-  ListScreen: { city?: ItemProps } | undefined;
-};
-type ItemProps = {
-  id: number;
-  name: string;
-  country: string;
-  time: string;
-  temp_c: number;
-  min_temp: number;
-  max_temp: number;
-  note: string;
+  HomeScreen: { item?: cityList };
+  ListScreen: { city?: cityList } | undefined;
 };
 
 type NavigationProp = NativeStackNavigationProp<
@@ -43,7 +29,7 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
   const [weatherHour, setWeatherHour] = useState<Hour[]>();
   const [weather, setWeather] = useState<WeatherResponse>();
   const route = useRoute<HomeModalRouteProp>();
-  const [cities, setCities] = useState<ItemProps[]>([]);
+  const [cities, setCities] = useState<cityList[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [refresh, setRefresh] = useState(true);
 
@@ -97,6 +83,7 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
     [refresh],
   );
 
+  const scrollRef = React.useRef<ScrollView>(null);
   const loadNameCity = useCallback(() => {
     try {
       const nameCity = route?.params?.item?.name;
@@ -106,12 +93,18 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
         setCurrentIndex(0);
         return fetchWeather('Hanoi');
       }
-      setCurrentIndex(idx);
-      return fetchWeather(nameCity);
+      if (idx >= 0) {
+        setCurrentIndex(idx);
+        scrollRef.current?.scrollTo({
+          x: idx * screenWidth,
+          animated: false,
+        });
+        return fetchWeather(nameCity);
+      }
     } catch (err) {
       console.error('Loi khi tai du lieu:', err);
     }
-  }, [route.params?.item?.name, cities, fetchWeather]);
+  }, [route.params?.item?.name, cities, fetchWeather, screenWidth]);
 
   useEffect(() => {
     loadNameCity();
@@ -131,10 +124,11 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
               name: 'Hanoi',
               country: 'Vietnam',
               temp_c: 36,
-              min_temp: 30,
-              max_temp: 60,
+              temp_f: 126,
+              mintemp_c: 30,
+              maxtemp_c: 60,
               note: 'string',
-              time: '2025-10-01 16:00',
+              time: moment().toDate(),
             },
           ]);
       } catch (err) {
@@ -143,21 +137,6 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
     };
     loadCities();
   }, []);
-
-  // Kiem tra thoi gian de hien thi thoi tiet theo thoi gian hien tai
-  const checkDay = (day: string | number) => {
-    const currenHour = moment(weather?.location?.localtime).format('HH');
-    const currentDay = moment().format('L');
-    if (moment(day).format('L') === currentDay) {
-      if (moment(day).format('HH') >= currenHour) {
-        return true;
-      } else return false;
-    } else {
-      if (moment(day).format('HH') < currenHour) {
-        return true;
-      }
-    }
-  };
 
   // Lam tron nhiet do
   const renderNumber = (value: number | undefined) => {
@@ -170,6 +149,7 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
 
   return (
     <ScrollView
+      ref={scrollRef}
       horizontal
       pagingEnabled
       showsHorizontalScrollIndicator={false}
@@ -188,157 +168,22 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
             resizeMode="cover"
             style={styles.imageBackground}
           >
-            <View style={styles.viewTitle}>
-              {weather?.location?.name === 'Hanoi' ? (
-                <View>
-                  <Text style={styles.textAddress}>Vị trí của tôi</Text>
-                  <Text
-                    style={{
-                      color: 'white',
-                      textAlign: 'center',
-                      fontWeight: '500',
-                      fontSize: 16,
-                    }}
-                  >
-                    Hanoi
-                  </Text>
-                </View>
-              ) : (
-                <Text style={styles.textAddress}>
-                  {weather?.location?.name}
-                </Text>
-              )}
-              <Text style={styles.textTemperature}>
-                {renderNumber(weather?.current?.temp_c)}°
-              </Text>
-              <Text style={styles.textNote}>
-                {weather?.current?.condition?.text}
-              </Text>
-              <Text style={styles.textNote}>
-                C:
-                {renderNumber(
-                  weather?.forecast?.forecastday?.[0]?.day?.maxtemp_c,
-                )}
-                ° T:
-                {renderNumber(
-                  weather?.forecast?.forecastday?.[0]?.day?.mintemp_c,
-                )}
-                °
-              </Text>
-            </View>
+            <WeatherTitle weather={weather} renderNumber={renderNumber} />
             <ScrollView
+              // stickyHeaderIndices={[0]}
               style={styles.container}
               showsVerticalScrollIndicator={false}
             >
               {/* Dự báo theo giờ */}
-              <View style={styles.detail}>
-                <Text style={styles.detailText}>
-                  Dự báo có mây vài nơi vào khoảng 21:00.
-                </Text>
-                <View style={styles.line} />
-                <ScrollView
-                  horizontal={true}
-                  showsHorizontalScrollIndicator={false}
-                >
-                  {weatherHour?.map((h, index) => {
-                    if (checkDay(h?.time))
-                      return (
-                        <View style={styles.detailHour} key={index}>
-                          <Text style={styles.textNote}>
-                            {moment(h?.time).isSame(
-                              moment(weather?.location?.localtime),
-                              'hour',
-                            )
-                              ? 'Bây '
-                              : moment(h?.time).format('HH')}
-                            giờ
-                          </Text>
-                          <Image
-                            source={{
-                              uri: `https:${h?.condition?.icon}`,
-                            }}
-                            style={styles.icon}
-                            resizeMode="cover"
-                          />
-                          <Text style={styles.textNote}>
-                            {renderNumber(h?.temp_c)}°
-                          </Text>
-                        </View>
-                      );
-                  })}
-                </ScrollView>
-              </View>
+              <HourlyForecast weather={weather} weatherHour={weatherHour} />
               {/* Dự báo 10 ngày */}
-              <View style={styles.detailDay}>
-                <Text style={styles.detailText}>DỰ BÁO TRONG 10 NGÀY</Text>
-                <Text style={styles.line} />
-                {weather?.forecast?.forecastday?.slice(0, 10).map((d, idx) => {
-                  const day = moment(d?.date).format('dddd');
-                  return (
-                    <View style={styles.detailEveryDay} key={idx}>
-                      <Text style={styles.textDay}>{day}</Text>
-                      <Image
-                        source={{ uri: `https:${d?.day?.condition?.icon}` }}
-                        style={styles.icon}
-                        resizeMode="cover"
-                      />
-                      <Text style={styles.minTemperature}>
-                        {renderNumber(d?.day?.mintemp_c)}°
-                      </Text>
-                      <Text style={styles.line} />
-                      <Text style={styles.maxTemperature}>
-                        {renderNumber(d?.day?.maxtemp_c)}°
-                      </Text>
-                    </View>
-                  );
-                })}
-              </View>
+              <DailyForecast weather={weather} renderNumber={renderNumber} />
             </ScrollView>
-            <View style={styles.footer}>
-              <Image
-                source={require('../../../img/map.png')}
-                style={styles.iconFooterSelected}
-              />
-              <View style={{ flexDirection: 'row' }}>
-                {cities.map((c, idx) => {
-                  if (idx === 0) {
-                    return (
-                      <Image
-                        key={idx}
-                        source={require('../../../img/right-arrow.png')}
-                        style={
-                          idx === currentIndex
-                            ? styles.iconFooterSelected
-                            : styles.iconFooter
-                        }
-                      />
-                    );
-                  } else {
-                    return (
-                      <Image
-                        key={idx}
-                        source={require('../../../img/dot.png')}
-                        style={
-                          idx === currentIndex
-                            ? styles.iconFooterSelected
-                            : styles.iconFooter
-                        }
-                      />
-                    );
-                  }
-                })}
-              </View>
-              <TouchableOpacity
-                onPress={() => {
-                  navigation.navigate('ListScreen');
-                }}
-              >
-                <Image
-                  source={require('../../../img/list.png')}
-                  style={styles.iconFooterSelected}
-                />
-              </TouchableOpacity>
-            </View>
+            <Footer
+              cities={cities}
+              currentIndex={currentIndex}
+              navigation={navigation}
+            />
           </ImageBackground>
         </View>
       ))}

@@ -102,6 +102,9 @@ const styles = StyleSheet.create({
   listAddress: {
     marginTop: 10,
   },
+  distanceItemFlatList: {
+    height: 12,
+  },
   viewImageBackground: {
     width: '100%',
   },
@@ -147,26 +150,12 @@ const styles = StyleSheet.create({
     padding: 4,
     height: 'auto',
   },
-  popoverItem: {
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    padding: 4,
-  },
-  menuItem: {
-    fontSize: 16,
-    color: 'white',
-    paddingLeft: 12,
-  },
   iconPopover: {
+    color: 'white',
     height: 20,
     width: 20,
     resizeMode: 'contain',
     marginLeft: 20,
-  },
-  iconTicked: {
-    backgroundColor: 'red',
-    height: 10,
-    width: 10,
   },
 });
 

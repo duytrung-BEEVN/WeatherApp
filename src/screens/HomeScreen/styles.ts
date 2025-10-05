@@ -21,13 +21,22 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   viewTitle: {
-    marginTop: 135,
+    marginTop: 115,
     alignItems: 'center',
+    height: 200,
   },
   textAddress: {
+    height: 50,
     fontSize: 30,
     color: 'white',
     textAlign: 'center',
+  },
+  textMyLocation: {
+    color: 'white',
+    textAlign: 'center',
+    fontWeight: '500',
+    fontSize: 16,
+    marginTop: -15,
   },
   textTemperature: {
     fontSize: 80,
@@ -91,10 +100,9 @@ const styles = StyleSheet.create({
   },
   detailEveryDay: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     marginTop: 8,
     fontSize: 20,
-    paddingRight: 8,
+    // paddingRight: 8,
   },
   textDay: {
     fontSize: 18,
@@ -103,7 +111,7 @@ const styles = StyleSheet.create({
     width: 100,
   },
   minTemperature: {
-    marginLeft: 50,
+    marginLeft: 20,
     fontSize: 16,
     color: 'white',
     fontWeight: 300,
@@ -114,6 +122,27 @@ const styles = StyleSheet.create({
     color: 'white',
     width: 30,
     fontWeight: 600,
+    marginLeft: 20,
+  },
+  tempBarMax: {
+    backgroundColor: '#696967e1',
+    marginBottom: 4,
+    marginLeft: 8,
+    alignSelf: 'center',
+    height: 4,
+    width: 100,
+    borderRadius: 4,
+  },
+  tempBar: {
+    backgroundColor: '#e7ba3ee1',
+    height: 4,
+    borderRadius: 4,
+  },
+  curTempIcon: {
+    backgroundColor: 'white',
+    borderRadius: 4,
+    width: 4,
+    height: 4,
   },
   headerModal: {
     paddingHorizontal: 4,
