@@ -20,7 +20,7 @@ const Footer = ({ cities, currentIndex, navigation }: Props) => {
   return (
     <View style={styles.footer}>
       <Image
-        source={require('../../../img/map.png')}
+        source={require('../../img/map.png')}
         style={styles.iconFooterSelected}
       />
       <View style={{ flexDirection: 'row' }}>
@@ -29,7 +29,7 @@ const Footer = ({ cities, currentIndex, navigation }: Props) => {
             return (
               <Image
                 key={idx}
-                source={require('../../../img/right-arrow.png')}
+                source={require('../../img/right-arrow.png')}
                 style={
                   idx === currentIndex
                     ? styles.iconFooterSelected
@@ -41,7 +41,7 @@ const Footer = ({ cities, currentIndex, navigation }: Props) => {
             return (
               <Image
                 key={idx}
-                source={require('../../../img/dot.png')}
+                source={require('../../img/dot.png')}
                 style={
                   idx === currentIndex
                     ? styles.iconFooterSelected
@@ -58,7 +58,7 @@ const Footer = ({ cities, currentIndex, navigation }: Props) => {
         }}
       >
         <Image
-          source={require('../../../img/list.png')}
+          source={require('../../img/list.png')}
           style={styles.iconFooterSelected}
         />
       </TouchableOpacity>

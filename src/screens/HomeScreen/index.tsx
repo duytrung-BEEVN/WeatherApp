@@ -138,12 +138,6 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
     loadCities();
   }, []);
 
-  // Lam tron nhiet do
-  const renderNumber = (value: number | undefined) => {
-    if (value) return Math.round(value);
-    return '--';
-  };
-
   // Anh nen
   const imageBackground = require('../../../img/hinh-nen-bau-troi-xanh_(6).jpg');
 
@@ -168,7 +162,7 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
             resizeMode="cover"
             style={styles.imageBackground}
           >
-            <WeatherTitle weather={weather} renderNumber={renderNumber} />
+            <WeatherTitle weather={weather} />
             <ScrollView
               // stickyHeaderIndices={[0]}
               style={styles.container}
@@ -177,7 +171,7 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp }) => {
               {/* Dự báo theo giờ */}
               <HourlyForecast weather={weather} weatherHour={weatherHour} />
               {/* Dự báo 10 ngày */}
-              <DailyForecast weather={weather} renderNumber={renderNumber} />
+              <DailyForecast weather={weather} />
             </ScrollView>
             <Footer
               cities={cities}

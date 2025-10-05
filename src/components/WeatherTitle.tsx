@@ -6,10 +6,9 @@ import { WeatherResponse } from '../types/responseAPIType';
 
 type WeatherTitleProps = {
   weather?: WeatherResponse;
-  renderNumber: (value: number | undefined) => number | string;
 };
 
-const WeatherTitle = ({ weather, renderNumber }: WeatherTitleProps) => {
+const WeatherTitle = ({ weather }: WeatherTitleProps) => {
   return (
     <View style={styles.viewTitle}>
       {weather?.location?.name === 'Hanoi' ? (
@@ -21,12 +20,14 @@ const WeatherTitle = ({ weather, renderNumber }: WeatherTitleProps) => {
         <Text style={styles.textAddress}>{weather?.location?.name}</Text>
       )}
       <Text style={styles.textTemperature}>
-        {renderNumber(weather?.current?.temp_c)}°
+        {Math.round(weather?.current?.temp_c || 0)}°
       </Text>
       <Text style={styles.textNote}>{weather?.current?.condition?.text}</Text>
       <Text style={styles.textNote}>
-        C: {renderNumber(weather?.forecast?.forecastday?.[0]?.day?.maxtemp_c)}°
-        T: {renderNumber(weather?.forecast?.forecastday?.[0]?.day?.mintemp_c)}°
+        C:{' '}
+        {Math.round(weather?.forecast?.forecastday?.[0]?.day?.maxtemp_c || 0)}°
+        T:{' '}
+        {Math.round(weather?.forecast?.forecastday?.[0]?.day?.mintemp_c || 0)}°
       </Text>
     </View>
   );

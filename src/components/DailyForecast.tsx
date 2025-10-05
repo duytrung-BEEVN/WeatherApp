@@ -6,10 +6,9 @@ import { WeatherResponse } from '../types/responseAPIType';
 
 type WeatherDailyProps = {
   weather?: WeatherResponse;
-  renderNumber: (value: number | undefined) => number | string;
 };
 
-const DailyForecast = ({ weather, renderNumber }: WeatherDailyProps) => {
+const DailyForecast = ({ weather }: WeatherDailyProps) => {
   // Vi tri cua nhiet do va do dai thanh nhiet do hien tai
   const minTemp = weather?.forecast?.forecastday
     ? Math.min(...weather?.forecast?.forecastday?.map(d => d.day.mintemp_c))
@@ -67,7 +66,7 @@ const DailyForecast = ({ weather, renderNumber }: WeatherDailyProps) => {
               resizeMode="cover"
             />
             <Text style={styles.minTemperature}>
-              {renderNumber(
+              {Math.round(
                 isDay
                   ? weather?.current?.temp_c < d?.day?.mintemp_c
                     ? weather?.current?.temp_c
@@ -100,7 +99,7 @@ const DailyForecast = ({ weather, renderNumber }: WeatherDailyProps) => {
               </View>
             </View>
             <Text style={styles.maxTemperature}>
-              {renderNumber(
+              {Math.round(
                 isDay
                   ? weather?.current?.temp_c > d?.day?.maxtemp_c
                     ? weather?.current?.temp_c

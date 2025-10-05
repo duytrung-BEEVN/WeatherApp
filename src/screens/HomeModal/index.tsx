@@ -72,12 +72,6 @@ const HomeModal = ({
     fetchWeather();
   }, [fetchWeather]);
 
-  // Lam tron sau dau phay
-  const renderNumber = (value: number | undefined) => {
-    if (value) return Math.round(value);
-    return '--';
-  };
-
   // Them du lieu thoi tiet cua thanh pho
   const addCityWeather = async () => {
     try {
@@ -115,7 +109,7 @@ const HomeModal = ({
         </TouchableOpacity>
       </View>
       {/* Tittle */}
-      <WeatherTitle weather={weather} renderNumber={renderNumber} />
+      <WeatherTitle weather={weather} />
       {/* Details */}
       <ScrollView
         // stickyHeaderIndices={[0]}
@@ -125,7 +119,7 @@ const HomeModal = ({
         {/* Dự báo theo giờ */}
         <HourlyForecast weather={weather} weatherHour={weatherHour} />
         {/* Dự báo 10 ngày */}
-        <DailyForecast weather={weather} renderNumber={renderNumber} />
+        <DailyForecast weather={weather} />
       </ScrollView>
     </ImageBackground>
   );

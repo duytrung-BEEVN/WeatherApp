@@ -1,3 +1,5 @@
+/* eslint-disable no-extra-boolean-cast */
+/* eslint-disable react-native/no-inline-styles */
 import {
   Image,
   ImageSourcePropType,
@@ -11,7 +13,7 @@ interface Props {
   title: string;
   icon?: ImageSourcePropType;
   onPressItem?: () => void;
-  textRight?: string;
+  textRight?: string | undefined;
   isTick?: boolean;
 }
 
@@ -19,10 +21,10 @@ const ButtonActionPopover = (props: Props) => {
   const { title, icon, onPressItem, textRight, isTick } = props;
   return (
     <TouchableOpacity style={styles.popoverItem} onPress={onPressItem}>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <View style={styles.aaa}>
         {isTick ? (
           <Image
-            style={{ width: 12, height: 12 }}
+            style={styles.iconTick}
             source={require('../../img/tick.png')}
           />
         ) : (
@@ -48,10 +50,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 4,
   },
+  aaa: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   menuItem: {
     fontSize: 16,
     color: 'white',
     marginLeft: 4,
+  },
+  iconTick: {
+    width: 12,
+    height: 12,
   },
   iconPopover: {
     color: 'white',
