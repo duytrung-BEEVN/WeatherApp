@@ -10,10 +10,10 @@ type WeatherHourlyProps = {
 };
 
 const HourlyForecast = ({ weather, weatherHour }: WeatherHourlyProps) => {
-  // Kiem tra thoi gian de hien thi thoi tiet theo thoi gian hien tai
+  // Check time
   const checkDay = (day: string | number) => {
-    const currenHour = moment(weather?.location?.localtime).format('HH'); //gio cua thanh pho hien tai
-    const currentDay = moment(weather?.location?.localtime).format('L'); //ngay cua thanh pho hien tai
+    const currenHour = moment(weather?.location?.localtime).format('HH'); //hour of current city
+    const currentDay = moment(weather?.location?.localtime).format('L'); //day of current city
     if (moment(day).format('L') === currentDay) {
       if (moment(day).format('HH') >= currenHour) {
         return true;
